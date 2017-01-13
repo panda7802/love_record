@@ -8,7 +8,7 @@ var currCount = 0;
 var snowIds = new Array();
 var NO_USE = 0;
 var USING = 1;
-var SNOW_BASE_COLOR = "#bbb";
+var SNOW_BASE_COLOR = "#ddd";
 
 //初始化雪花id
 function initIds() {
@@ -48,14 +48,35 @@ function snowDrop(eleSnow, currPos,id) {
     }, 50);
 }
 
+function getRandomColor (rmin, rmax, gmin, gmax, bmin, bmax, a) {
+    var r = Math.round(Garden.random(rmin, rmax));
+    var g = Math.round(Garden.random(gmin, gmax));
+    var b = Math.round(Garden.random(bmin, bmax));
+    var limit = 25;
+    if ((Math.abs(r - g) <= limit) && (Math.abs(g - b) <= limit) && (Math.abs(b - r) <= limit)) {
+        return getRandomColor(rmin, rmax, gmin, gmax, bmin, bmax, a);
+    } else if ((r < 128) && (g < 128) && (b < 128)) {
+         return getRandomColor(rmin, rmax, gmin, gmax, bmin, bmax, a);
+    } else {
+        return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+    }
+};
+
 
 //点击雪
 function clickSnow(id) {
+    eleSnow = document.getElementById("snow"+id);
     if (NO_USE == eleSnow.getAttribute("snowing")) {
         return;
     }
-    eleSnow = document.getElementById("snow"+id);
-    eleSnow.style.color = "#fff";
+    eleSnow.setAttribute("snowing",NO_USE);
+    // eleSnow.style.color = "#fff";
+    s_rgba = getRandomColor(0,  255, //
+        0, 255, //
+        0, 255, //
+        1);
+    // console.log(s_rgba);
+    eleSnow.style.color = s_rgba;// s_rgba;
 
     var textSize = eleSnow.style.getPropertyValue("font-size");//字体大小(包含px)
     textSize = textSize.substring(0,textSize.length - 2);
@@ -68,12 +89,15 @@ function clickSnow(id) {
     // console.log("textSize : " + textSize + " , " + showText.length);
     eleSnow.style.marginLeft = parseInt(xPos  - textSize * showText.length / 2) + "px";
     eleSnow.innerHTML = showText;
-    eleSnow.setAttribute("snowing",NO_USE);
+    
 }
 
 //触摸雪
 function touchSnow(id) {
     eleSnow = document.getElementById("snow"+id);
+    if (NO_USE == eleSnow.getAttribute("snowing")) {
+        return;
+    }
     eleSnow.style.color = "#fff";
 }
 
@@ -122,6 +146,12 @@ function startSingleSnow() {
 var funcIdStartSnow = 0;
 
 function startSnow() {
+    var u = navigator.userAgent;
+    var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+    var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+    if ( (true == isiOS) || (true == isAndroid)) {
+        SNOW_BASE_COLOR = "#fff";
+    }
 
     var snowSpeed = 1; //设置下雪的速度，越大雪花越多，下的越快
     snowbg = document.getElementById('snowbg');
